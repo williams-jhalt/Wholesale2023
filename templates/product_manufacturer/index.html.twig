@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ProductManufacturer index{% endblock %}
+
+{% block body %}
+    <h1>ProductManufacturer index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product_manufacturer in product_manufacturers %}
+            <tr>
+                <td>{{ product_manufacturer.id }}</td>
+                <td>{{ product_manufacturer.code }}</td>
+                <td>{{ product_manufacturer.name }}</td>
+                <td>
+                    <a href="{{ path('app_product_manufacturer_show', {'id': product_manufacturer.id}) }}">show</a>
+                    <a href="{{ path('app_product_manufacturer_edit', {'id': product_manufacturer.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_product_manufacturer_new') }}">Create new</a>
+{% endblock %}

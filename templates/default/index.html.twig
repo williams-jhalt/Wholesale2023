@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DefaultController!{% endblock %}
+
+{% block body %}
+
+    <h1>Wholesale Catalog Management System</h1>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <p>Welcome back {{ app.user.email }}</p>
+        <p><a href="{{ path('app_logout') }}">Logout</a></p>
+    {% else %}
+        <p><a href="{{ path('app_login') }}">Login</a></p>
+    {% endif %}
+
+{% endblock %}
