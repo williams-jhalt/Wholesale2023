@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/product/type')]
+#[Route('/product-type')]
 class ProductTypeController extends AbstractController
 {
     #[Route('/', name: 'app_product_type_index', methods: ['GET'])]
@@ -34,7 +34,7 @@ class ProductTypeController extends AbstractController
             return $this->redirectToRoute('app_product_type_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('product_type/new.html.twig', [
+        return $this->render('product_type/new.html.twig', [
             'product_type' => $productType,
             'form' => $form,
         ]);
@@ -60,7 +60,7 @@ class ProductTypeController extends AbstractController
             return $this->redirectToRoute('app_product_type_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('product_type/edit.html.twig', [
+        return $this->render('product_type/edit.html.twig', [
             'product_type' => $productType,
             'form' => $form,
         ]);

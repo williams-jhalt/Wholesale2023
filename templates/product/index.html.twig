@@ -2,36 +2,67 @@
 
 {% block title %}Product index{% endblock %}
 
-{% block body %}
-    <h1>Product index</h1>
+{% block javascripts %}
+<script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#productTable').DataTable({
+            ajax: {
+                url: '{{ path('app_product_data') }}',
+                method: 'POST'
+            },
+            fnServerParams: function(data) {
+                data['order'].forEach(function(items, index) {
+                    data['order'][index]['column_name'] = data['columns'][items.column]['name'];
+                });
+            },
+            columns: [
+                { name: 'p.itemNumber', data: 'itemNumber' },
+                { name: 'p.name', data: 'name' },
+                { name: 'p.releaseDate', data: 'releaseDate', render: function (data, type, row, meta) {
+                    return (new Date(data)).toLocaleDateString();
+                } },
+                { 
+                    data: 'id',
+                    render: function (data, type, row, meta) {
+                        return '<div class="text-center"><a href="' + data + '">View</a> &nbsp;|&nbsp; <a href="' + data + '/edit">Edit</a></div>';
+                    },
+                    orderable: false
+                }
+            ],
+            processing: true,
+            serverSide: true,
+            stateSave: true
+        });
+    });
+</script>
+{% endblock %}
 
-    <table class="table">
+{% block stylesheets %}
+    <link href="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col">
+            <h1>Products</h1>
+        </div>
+        <div class="col text-right">
+            <a class="btn btn-primary" href="{{ path('app_product_new') }}"><span class="fa fa-plus"></span> New</a>
+        </div>
+    </div>
+
+    <table id="productTable" class="table display table-striped table-bordered">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>ItemNumber</th>
                 <th>Name</th>
-                <th>actions</th>
+                <th>Release Date</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-        {% for product in products %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.itemNumber }}</td>
-                <td>{{ product.name }}</td>
-                <td>
-                    <a href="{{ path('app_product_show', {'id': product.id}) }}">show</a>
-                    <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_product_new') }}">Create new</a>
 {% endblock %}

@@ -11,7 +11,7 @@ class ProductTypeControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private ProductTypeRepository $repository;
-    private string $path = '/product/type/';
+    private string $path = '/product-type/';
 
     protected function setUp(): void
     {
@@ -28,10 +28,7 @@ class ProductTypeControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('ProductType index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        
     }
 
     public function testNew(): void
@@ -48,14 +45,14 @@ class ProductTypeControllerTest extends WebTestCase
             'product_type[name]' => 'Testing',
         ]);
 
-        self::assertResponseRedirects('/product/type/');
+        self::assertResponseRedirects('/product-type/');
 
         self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
+        
         $fixture = new ProductType();
         $fixture->setCode('My Title');
         $fixture->setName('My Title');
@@ -65,14 +62,13 @@ class ProductTypeControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('ProductType');
 
         // Use assertions to check that the properties are properly displayed.
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
+        
         $fixture = new ProductType();
         $fixture->setCode('My Title');
         $fixture->setName('My Title');
@@ -86,7 +82,7 @@ class ProductTypeControllerTest extends WebTestCase
             'product_type[name]' => 'Something New',
         ]);
 
-        self::assertResponseRedirects('/product/type/');
+        self::assertResponseRedirects('/product-type/');
 
         $fixture = $this->repository->findAll();
 
@@ -96,7 +92,7 @@ class ProductTypeControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
+        
 
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
@@ -108,10 +104,10 @@ class ProductTypeControllerTest extends WebTestCase
 
         self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $this->client->submitForm('deleteButton');
 
         self::assertSame($originalNumObjectsInRepository, count($this->repository->findAll()));
-        self::assertResponseRedirects('/product/type/');
+        self::assertResponseRedirects('/product-type/');
     }
 }

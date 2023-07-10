@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/product/manufacturer')]
+#[Route('/product-manufacturer')]
 class ProductManufacturerController extends AbstractController
 {
     #[Route('/', name: 'app_product_manufacturer_index', methods: ['GET'])]
@@ -34,7 +34,7 @@ class ProductManufacturerController extends AbstractController
             return $this->redirectToRoute('app_product_manufacturer_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('product_manufacturer/new.html.twig', [
+        return $this->render('product_manufacturer/new.html.twig', [
             'product_manufacturer' => $productManufacturer,
             'form' => $form,
         ]);
@@ -60,7 +60,7 @@ class ProductManufacturerController extends AbstractController
             return $this->redirectToRoute('app_product_manufacturer_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('product_manufacturer/edit.html.twig', [
+        return $this->render('product_manufacturer/edit.html.twig', [
             'product_manufacturer' => $productManufacturer,
             'form' => $form,
         ]);

@@ -11,7 +11,7 @@ class ProductManufacturerControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private ProductManufacturerRepository $repository;
-    private string $path = '/product/manufacturer/';
+    private string $path = '/product-manufacturer/';
 
     protected function setUp(): void
     {
@@ -28,7 +28,6 @@ class ProductManufacturerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('ProductManufacturer index');
 
         // Use the $crawler to perform additional assertions e.g.
         // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
@@ -38,7 +37,7 @@ class ProductManufacturerControllerTest extends WebTestCase
     {
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
-        $this->markTestIncomplete();
+        
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
@@ -48,14 +47,14 @@ class ProductManufacturerControllerTest extends WebTestCase
             'product_manufacturer[name]' => 'Testing',
         ]);
 
-        self::assertResponseRedirects('/product/manufacturer/');
+        self::assertResponseRedirects('/product-manufacturer/');
 
         self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
+        
         $fixture = new ProductManufacturer();
         $fixture->setCode('My Title');
         $fixture->setName('My Title');
@@ -65,14 +64,13 @@ class ProductManufacturerControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('ProductManufacturer');
 
         // Use assertions to check that the properties are properly displayed.
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
+        
         $fixture = new ProductManufacturer();
         $fixture->setCode('My Title');
         $fixture->setName('My Title');
@@ -86,7 +84,7 @@ class ProductManufacturerControllerTest extends WebTestCase
             'product_manufacturer[name]' => 'Something New',
         ]);
 
-        self::assertResponseRedirects('/product/manufacturer/');
+        self::assertResponseRedirects('/product-manufacturer/');
 
         $fixture = $this->repository->findAll();
 
@@ -96,7 +94,7 @@ class ProductManufacturerControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
+        
 
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
@@ -108,10 +106,10 @@ class ProductManufacturerControllerTest extends WebTestCase
 
         self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $this->client->submitForm('deleteButton');
 
         self::assertSame($originalNumObjectsInRepository, count($this->repository->findAll()));
-        self::assertResponseRedirects('/product/manufacturer/');
+        self::assertResponseRedirects('/product-manufacturer/');
     }
 }

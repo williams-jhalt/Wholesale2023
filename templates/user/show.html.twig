@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_user_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>User</h1>
+        </div>
+    </div>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ user.id }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <th>Roles</th>
+                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>{{ user.password }}</td>
+            </tr>
+            <tr>
+                <th>IsVerified</th>
+                <td>{{ user.isVerified ? 'Yes' : 'No' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a class="btn btn-primary" href="{{ path('app_user_edit', {'id': user.id}) }}"><span class="fa fa-edit"></span> Edit</a>
+    
+{% endblock %}

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
@@ -32,6 +33,9 @@ class Product
 
     #[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
     private Collection $categories;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $releaseDate = null;
 
     public function __construct()
     {
@@ -142,6 +146,18 @@ class Product
     public function removeCategory(ProductCategory $category): static
     {
         $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getReleaseDate(): ?\DateTimeInterface
+    {
+        return $this->releaseDate;
+    }
+
+    public function setReleaseDate(?\DateTimeInterface $releaseDate): static
+    {
+        $this->releaseDate = $releaseDate;
 
         return $this;
     }

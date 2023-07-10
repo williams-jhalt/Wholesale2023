@@ -1,11 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New ProductManufacturer{% endblock %}
+{% block title %}New Manufacturer{% endblock %}
 
 {% block body %}
-    <h1>Create new ProductManufacturer</h1>
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_product_manufacturer_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>New Manufacturer</h1>
+        </div>
+    </div>
 
     {{ include('product_manufacturer/_form.html.twig') }}
-
-    <a href="{{ path('app_product_manufacturer_index') }}">back to list</a>
+    
 {% endblock %}

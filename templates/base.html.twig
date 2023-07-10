@@ -54,10 +54,23 @@
 
                 <!-- Heading -->
                 <div class="sidebar-heading">
-                    Interface
+                    Catalog
                 </div>
 
-                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">                
+                    <a class="nav-link" href="{{ path('app_product_index') }}">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_product_manufacturer_index') }}">Manufacturers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_product_category_index') }}">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_product_type_index') }}">Product Types</a>
+                </li>
+
+                {# <!-- Nav Item - Pages Collapse Menu -->
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                         aria-expanded="true" aria-controls="collapseTwo">
@@ -73,7 +86,7 @@
                             <a class="collapse-item" href="{{ path('app_product_type_index') }}">Product Types</a>
                         </div>
                     </div>
-                </li>
+                </li> #}
 
                 <!-- Nav Item - Utilities Collapse Menu -->
                 <li class="nav-item">
@@ -86,7 +99,7 @@
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Site Admin:</h6>
-                            <a class="collapse-item" href="#">Users</a>
+                            <a class="collapse-item" href="{{ path('app_user_index') }}">Users</a>
                         </div>
                     </div>
                 </li>

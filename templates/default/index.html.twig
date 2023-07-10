@@ -6,11 +6,64 @@
 
     <h1>Wholesale Catalog Management System</h1>
 
-    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <p>Welcome back {{ app.user.email }}</p>
-        <p><a href="{{ path('app_logout') }}">Logout</a></p>
-    {% else %}
-        <p><a href="{{ path('app_login') }}">Login</a></p>
-    {% endif %}
+    <div class="row">
+    
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Products</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ statistics.product_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Manufacturers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ statistics.manufacturer_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Types</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ statistics.type_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Categories</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ statistics.category_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
 
 {% endblock %}

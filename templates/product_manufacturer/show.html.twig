@@ -3,7 +3,15 @@
 {% block title %}ProductManufacturer{% endblock %}
 
 {% block body %}
-    <h1>ProductManufacturer</h1>
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_product_manufacturer_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>Viewing Manufacturer</h1>
+        </div>
+    </div>
 
     <table class="table">
         <tbody>
@@ -20,11 +28,8 @@
                 <td>{{ product_manufacturer.name }}</td>
             </tr>
         </tbody>
-    </table>
+    </table>    
+    
+    <a class="btn btn-primary" href="{{ path('app_product_manufacturer_edit', {'id': product_manufacturer.id}) }}"><span class="fa fa-edit"></span> Edit</a>
 
-    <a href="{{ path('app_product_manufacturer_index') }}">back to list</a>
-
-    <a href="{{ path('app_product_manufacturer_edit', {'id': product_manufacturer.id}) }}">edit</a>
-
-    {{ include('product_manufacturer/_delete_form.html.twig') }}
 {% endblock %}

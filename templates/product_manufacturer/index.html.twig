@@ -2,13 +2,38 @@
 
 {% block title %}ProductManufacturer index{% endblock %}
 
-{% block body %}
-    <h1>ProductManufacturer index</h1>
+{% block javascripts %}
+<script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#manufacturerTable').DataTable(
+            {
+                stateSave: true
+            }
+        );
+    });
+</script>
+{% endblock %}
 
-    <table class="table">
+{% block stylesheets %}
+    <link href="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col">
+            <h1>Manufacturers</h1>
+        </div>
+        <div class="col text-right">
+            <a class="btn btn-primary" href="{{ path('app_product_manufacturer_new') }}"><span class="fa fa-plus"></span> New</a>
+        </div>
+    </div>
+
+    <table id="manufacturerTable" class="table display table-striped table-bordered">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>Code</th>
                 <th>Name</th>
                 <th>actions</th>
@@ -17,12 +42,11 @@
         <tbody>
         {% for product_manufacturer in product_manufacturers %}
             <tr>
-                <td>{{ product_manufacturer.id }}</td>
                 <td>{{ product_manufacturer.code }}</td>
                 <td>{{ product_manufacturer.name }}</td>
-                <td>
-                    <a href="{{ path('app_product_manufacturer_show', {'id': product_manufacturer.id}) }}">show</a>
-                    <a href="{{ path('app_product_manufacturer_edit', {'id': product_manufacturer.id}) }}">edit</a>
+                <td class="text-center">
+                    <a href="{{ path('app_product_manufacturer_show', {'id': product_manufacturer.id}) }}">View</a>&nbsp;|&nbsp;
+                    <a href="{{ path('app_product_manufacturer_edit', {'id': product_manufacturer.id}) }}">Edit</a>
                 </td>
             </tr>
         {% else %}
@@ -32,6 +56,5 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_product_manufacturer_new') }}">Create new</a>
+    
 {% endblock %}

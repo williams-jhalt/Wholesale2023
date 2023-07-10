@@ -3,7 +3,15 @@
 {% block title %}ProductCategory{% endblock %}
 
 {% block body %}
-    <h1>ProductCategory</h1>
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_product_category_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>Viewing Category</h1>
+        </div>
+    </div>
 
     <table class="table">
         <tbody>
@@ -22,9 +30,6 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_product_category_index') }}">back to list</a>
-
-    <a href="{{ path('app_product_category_edit', {'id': product_category.id}) }}">edit</a>
-
-    {{ include('product_category/_delete_form.html.twig') }}
+    <a class="btn btn-primary" href="{{ path('app_product_category_edit', {'id': product_category.id}) }}"><span class="fa fa-edit"></span> Edit</a>
+    
 {% endblock %}
