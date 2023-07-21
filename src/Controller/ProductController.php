@@ -3,15 +3,21 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Form\ProductImportType;
 use App\Form\ProductType;
+use App\Message\ProductUpdateNotification;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\QueryBuilder;
+use SplFileObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/product')]
@@ -107,6 +113,99 @@ class ProductController extends AbstractController
             'product' => $product,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/import-progress', name: 'app_product_import_progress')]
+    public function importProgress(Request $request, MessageBusInterface $bus): JsonResponse
+    {
+        $batch = $request->get('batch', 0);
+        $totalBatches = $request->get('totalBatches', 0);
+        $importKey = $request->get('importKey');
+
+        if ($batch <= $totalBatches) {
+
+            $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $batch . ".tmp", "r");
+
+            $p = [];
+
+            while (!$fh->eof()) {
+
+                $data = $fh->fgetcsv();
+
+                if ($data !== null && sizeof($data) > 1) {
+
+                    $p[] = [
+                        'sku' => $data[0],
+                        'name' => $data[1],
+                        'releaseDate' => $data[2],
+                        'manufacturer' => $data[4],
+                        'type' => $data[5],
+                        'categories' => explode('|', $data[6])
+                    ];
+
+                }
+
+            }
+
+            $bus->dispatch(new ProductUpdateNotification($p, $batch, $importKey));
+
+        }
+
+        return new JsonResponse(['batch' => $batch, 'totalBatches' => $totalBatches]);
+
+    }
+
+    #[Route('/import', name: 'app_product_import')]
+    public function import(Request $request): Response
+    {
+
+        $form = $this->createForm(ProductImportType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $importKey = uniqid();
+            $currentBatch = 0;
+
+            $importFile = $form->get('importFile')->getData();
+
+            if ($importFile) {                
+
+                $f = $importFile->openFile("r");
+
+                $filesystem = new Filesystem();
+                $filesystem->mkdir($this->getParameter("app.import_dir") . "/product_import/");
+
+                $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
+
+                $totalLines = 0;
+
+                while(!$f->eof()) { 
+                    $fh->fputcsv($f->fgetcsv());                    
+                    if ((++$totalLines % 100) == 0) {
+                        $currentBatch++;
+                        $fh = null;
+                        $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
+                    }
+                }
+
+                $f = null;
+                $fh = null;
+
+            }
+
+            return $this->render('product/import_progress.html.twig', [
+                'importKey' => $importKey,
+                'batch' => 0,
+                'totalBatches' => $currentBatch
+            ]);
+
+        }
+
+        return $this->render('product/import.html.twig', [
+            'form' => $form
+        ]);
+
     }
 
     #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
