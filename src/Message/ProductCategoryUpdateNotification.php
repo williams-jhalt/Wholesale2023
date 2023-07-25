@@ -2,7 +2,7 @@
 
 namespace App\Message;
 
-class ProductUpdateNotification
+class ProductCategoryUpdateNotification
 {
 
     public function __construct(

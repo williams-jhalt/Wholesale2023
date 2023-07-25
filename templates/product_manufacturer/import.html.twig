@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import Products{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_product_manufacturer_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>Import Product</h1>
+        </div>
+        <div class="col text-right">
+        </div>
+    </div>
+
+    {{ form_start(form) }}
+        {{ form_row(form.skipFirst ) }}
+        {{ form_row(form.importFile ) }}
+        <button class="btn btn-primary" type="submit">Import</button>
+    {{ form_end(form) }}
+
+{% endblock %}

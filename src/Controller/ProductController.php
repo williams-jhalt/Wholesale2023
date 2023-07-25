@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Form\CsvImportType;
 use App\Form\ProductImportType;
 use App\Form\ProductType;
 use App\Message\ProductUpdateNotification;
 use App\Repository\ProductRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\QueryBuilder;
@@ -124,9 +127,11 @@ class ProductController extends AbstractController
 
         if ($batch <= $totalBatches) {
 
-            $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $batch . ".tmp", "r");
+            $filename = $this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $batch . ".tmp";
 
-            $p = [];
+            $fh = new \SplFileObject($filename, "r");
+
+            $items = [];
 
             while (!$fh->eof()) {
 
@@ -134,20 +139,27 @@ class ProductController extends AbstractController
 
                 if ($data !== null && sizeof($data) > 1) {
 
-                    $p[] = [
-                        'sku' => $data[0],
-                        'name' => $data[1],
-                        'releaseDate' => $data[2],
-                        'manufacturer' => $data[4],
-                        'type' => $data[5],
-                        'categories' => explode('|', $data[6])
-                    ];
+                    $t = new \App\Model\Product();
+                    $t->itemNumber = $data[0];
+                    $t->name = $data[1];
+                    if ($releaseDate = DateTime::createFromFormat('Y-m-d', $data[2])) {
+                        $t->releaseDate = $releaseDate;
+                    }
+                    $t->manufacturerCode = $data[4];
+                    $t->typeCode = $data[5];
+                    $t->categoryCodes = explode('|', $data[6]);
+
+                    $items[] = $t;
 
                 }
 
             }
 
-            $bus->dispatch(new ProductUpdateNotification($p, $batch, $importKey));
+            $bus->dispatch(new ProductUpdateNotification($items));
+
+            $fh = null;
+
+            unlink($filename);
 
         }
 
@@ -159,7 +171,7 @@ class ProductController extends AbstractController
     public function import(Request $request): Response
     {
 
-        $form = $this->createForm(ProductImportType::class);
+        $form = $this->createForm(CsvImportType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -8,7 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\File;
 
-class ProductImportType extends AbstractType
+class CsvImportType extends AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -27,7 +27,8 @@ class ProductImportType extends AbstractType
                 ])
             ]
         ])->add("skipFirst", CheckboxType::class, [
-            'label' => "Skip First Line"
+            'label' => "Skip First Line",
+            'required' => false
         ]);
     }
 
