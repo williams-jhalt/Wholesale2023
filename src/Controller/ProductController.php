@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Entity\ProductImage;
 use App\Form\CsvImportType;
+use App\Form\ProductImageType;
 use App\Form\ProductImportType;
 use App\Form\ProductType;
 use App\Message\ProductUpdateNotification;
+use App\Repository\ProductImageRepository;
 use App\Repository\ProductRepository;
 use DateTime;
 use DateTimeImmutable;
@@ -129,7 +132,7 @@ class ProductController extends AbstractController
 
             $filename = $this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $batch . ".tmp";
 
-            $fh = new \SplFileObject($filename, "r");
+            $fh = new SplFileObject($filename, "r");
 
             $items = [];
 
@@ -140,14 +143,14 @@ class ProductController extends AbstractController
                 if ($data !== null && sizeof($data) > 1) {
 
                     $t = new \App\Model\Product();
-                    $t->itemNumber = $data[0];
-                    $t->name = $data[1];
+                    $t->setItemNumber($data[0]);
+                    $t->setName($data[1]);
+                    $t->setManufacturerCode($data[4]);
+                    $t->setTypeCode($data[5]);
+                    $t->setCategoryCodes(explode('|', $data[6]));
                     if ($releaseDate = DateTime::createFromFormat('Y-m-d', $data[2])) {
-                        $t->releaseDate = $releaseDate;
+                        $t->setReleaseDate($releaseDate);
                     }
-                    $t->manufacturerCode = $data[4];
-                    $t->typeCode = $data[5];
-                    $t->categoryCodes = explode('|', $data[6]);
 
                     $items[] = $t;
 
@@ -166,6 +169,35 @@ class ProductController extends AbstractController
         return new JsonResponse(['batch' => $batch, 'totalBatches' => $totalBatches]);
 
     }
+    
+    #[Route('/import-confirm', name: 'app_product_import_confirm')]
+    public function importConfirm(Request $request): Response
+    {
+
+        $importKey = $request->get('importKey');
+        $totalBatches = $request->get('totalBatches');
+
+        return $this->render('product/import_progress.html.twig', [
+            'importKey' => $importKey,
+            'totalBatches' => $totalBatches
+        ]);
+
+    }
+    
+    #[Route('/import-cancel', name: 'app_product_import_cancel')]
+    public function importCancel(Request $request): Response
+    {
+
+        $importKey = $request->get('importKey');
+        $totalBatches = $request->get('totalBatches');
+
+        for ($i = 0; $i <= $totalBatches; $i++) {
+            unlink($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $i . ".tmp");
+        }
+
+        return $this->redirectToRoute('app_product_index');
+
+    }
 
     #[Route('/import', name: 'app_product_import')]
     public function import(Request $request): Response
@@ -179,6 +211,7 @@ class ProductController extends AbstractController
             $importKey = uniqid();
             $currentBatch = 0;
 
+            $skipFirst = $form->get('skipFirst')->getData();
             $importFile = $form->get('importFile')->getData();
 
             if ($importFile) {                
@@ -188,16 +221,21 @@ class ProductController extends AbstractController
                 $filesystem = new Filesystem();
                 $filesystem->mkdir($this->getParameter("app.import_dir") . "/product_import/");
 
-                $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
+                $fh = new SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
 
                 $totalLines = 0;
 
                 while(!$f->eof()) { 
-                    $fh->fputcsv($f->fgetcsv());                    
+                    $line = $f->fgetcsv();
+                    if ($totalLines == 0 && $skipFirst) {
+                        $totalLines++;
+                        continue;
+                    }
+                    $fh->fputcsv($line);                   
                     if ((++$totalLines % 100) == 0) {
                         $currentBatch++;
                         $fh = null;
-                        $fh = new \SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
+                        $fh = new SplFileObject($this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_" . $currentBatch . ".tmp", "w");
                     }
                 }
 
@@ -206,10 +244,12 @@ class ProductController extends AbstractController
 
             }
 
-            return $this->render('product/import_progress.html.twig', [
+            $sampleFilename = $this->getParameter("app.import_dir") . "/product_import/" . $importKey . "_0.tmp";
+
+            return $this->render('product/import_confirm.html.twig', [
                 'importKey' => $importKey,
-                'batch' => 0,
-                'totalBatches' => $currentBatch
+                'totalBatches' => $currentBatch,
+                'importSample' => file_get_contents($sampleFilename)
             ]);
 
         }
@@ -218,6 +258,28 @@ class ProductController extends AbstractController
             'form' => $form
         ]);
 
+    }
+
+    #[Route('/add-image/{id}', name: 'app_product_add_image')]
+    public function addImage(Request $request, Product $product, ProductRepository $productRepository, ProductImageRepository $productImageRepository): Response
+    {
+
+        $productImage = new ProductImage();
+        $form = $this->createForm(ProductImageType::class, $productImage);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $productImageRepository->save($productImage, true);
+            $product->addImage($productImage);
+            $productRepository->save($product, true);
+            return $this->redirectToRoute('app_product_edit', ['id' => $product->getId()]);        
+        }
+
+        return $this->render('product/add_image.html.twig', [
+            'product' => $product,
+            'productImage' => $productImage,
+            'form' => $form
+        ]);
     }
 
     #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]

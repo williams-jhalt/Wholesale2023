@@ -2,13 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(normalizationContext: ['groups' => 'product:item']),
+        new GetCollection(normalizationContext: ['groups' => 'product:list'])
+    ],
+    order: ['releaseDate' => 'DESC', 'itemNumber' => 'ASC'],
+    paginationEnabled: true
+)]
 class Product
 {
     #[ORM\Id]
@@ -17,24 +29,31 @@ class Product
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:list', 'product:item'])]
     private ?string $itemNumber = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:list', 'product:item'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
+    #[Groups(['product:item'])]
     private ?ProductType $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
+    #[Groups(['product:item'])]
     private ?ProductManufacturer $manufacturer = null;
 
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductImage::class, orphanRemoval: true)]
+    #[Groups(['product:item'])]
     private Collection $images;
 
     #[ORM\ManyToMany(targetEntity: ProductCategory::class, inversedBy: 'products')]
+    #[Groups(['product:item'])]
     private Collection $categories;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['product:list', 'product:item'])]
     private ?\DateTimeInterface $releaseDate = null;
 
     public function __construct()

@@ -10,6 +10,7 @@
                 if (data.batch == data.totalBatches) {                    
                     $(".progress-bar").attr('style', 'width: 100%');
                     $(".progress-bar").attr('aria-valuenow', 100);
+                    $("#finished").append('<a class="btn btn-primary" href="{{ path('app_product_category_index') }}">Finished</a>');
                 } else {
                     for (i = data.batch; i <= data.totalBatches; i++) {
                         $.get('{{ path('app_product_category_import_progress') }}', {batch: i, totalBatches: {{ totalBatches }}, importKey: '{{ importKey }}'}, function(data) {
@@ -17,6 +18,9 @@
                             current_width = (100 * (data.batch / data.totalBatches));
                             $(".progress-bar").attr('style', 'width: ' + current_width + '%');
                             $(".progress-bar").attr('aria-valuenow', current_width);
+                            if (current_width == 100) {
+                                $("#finished").append('<a class="btn btn-primary" href="{{ path('app_product_category_index') }}">Finished</a>');
+                            }
                         });
                     }
                 }
@@ -32,7 +36,7 @@
             <a class="btn btn-light" href="{{ path('app_product_category_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
         </div>
         <div class="col">
-            <h1>Import Product</h1>
+            <h1>Importing Categories</h1>
         </div>
         <div class="col text-right">
         </div>
@@ -41,5 +45,9 @@
     <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
+
+    <br>
+
+    <div id="finished"></div>
 
 {% endblock %}

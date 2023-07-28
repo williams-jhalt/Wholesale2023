@@ -67,8 +67,8 @@ class ProductCategoryController extends AbstractController
                 if ($data !== null && sizeof($data) > 1) {
 
                     $t = new \App\Model\ProductCategory();
-                    $t->code = $data[0];
-                    $t->name = $data[1];
+                    $t->setCode($data[0]);
+                    $t->setName($data[1]);
 
                     $p[] = $t;
 
@@ -87,6 +87,35 @@ class ProductCategoryController extends AbstractController
         return new JsonResponse(['batch' => $batch, 'totalBatches' => $totalBatches]);
 
     }
+    
+    #[Route('/import-confirm', name: 'app_product_category_import_confirm')]
+    public function importConfirm(Request $request): Response
+    {
+
+        $importKey = $request->get('importKey');
+        $totalBatches = $request->get('totalBatches');
+
+        return $this->render('product_category/import_progress.html.twig', [
+            'importKey' => $importKey,
+            'totalBatches' => $totalBatches
+        ]);
+
+    }
+    
+    #[Route('/import-cancel', name: 'app_product_category_import_cancel')]
+    public function importCancel(Request $request): Response
+    {
+
+        $importKey = $request->get('importKey');
+        $totalBatches = $request->get('totalBatches');
+
+        for ($i = 0; $i <= $totalBatches; $i++) {
+            unlink($this->getParameter("app.import_dir") . "/product_category_import/" . $importKey . "_" . $i . ".tmp");
+        }
+
+        return $this->redirectToRoute('app_product_category_index');
+
+    }
 
     #[Route('/import', name: 'app_product_category_import')]
     public function import(Request $request): Response
@@ -100,6 +129,7 @@ class ProductCategoryController extends AbstractController
             $importKey = uniqid();
             $currentBatch = 0;
 
+            $skipFirst = $form->get('skipFirst')->getData();
             $importFile = $form->get('importFile')->getData();
 
             if ($importFile) {                
@@ -114,7 +144,12 @@ class ProductCategoryController extends AbstractController
                 $totalLines = 0;
 
                 while(!$f->eof()) { 
-                    $fh->fputcsv($f->fgetcsv());                    
+                    $line = $f->fgetcsv();
+                    if ($totalLines == 0 && $skipFirst) {
+                        $totalLines++;
+                        continue;
+                    }
+                    $fh->fputcsv($line);                    
                     if ((++$totalLines % 100) == 0) {
                         $currentBatch++;
                         $fh = null;
@@ -127,10 +162,12 @@ class ProductCategoryController extends AbstractController
 
             }
 
-            return $this->render('product_category/import_progress.html.twig', [
+            $sampleFilename = $this->getParameter("app.import_dir") . "/product_category_import/" . $importKey . "_0.tmp";
+
+            return $this->render('product_category/import_confirm.html.twig', [
                 'importKey' => $importKey,
-                'batch' => 0,
-                'totalBatches' => $currentBatch
+                'totalBatches' => $currentBatch,
+                'importSample' => file_get_contents($sampleFilename)
             ]);
 
         }

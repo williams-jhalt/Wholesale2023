@@ -29,7 +29,7 @@
             </tr>
             <tr>
                 <th>Release Date</th>
-                <td>{{ product.releaseDate }}</td>
+                <td>{{ product.releaseDate|format_date('long') }}</td>
             </tr>
         </tbody>
     </table>

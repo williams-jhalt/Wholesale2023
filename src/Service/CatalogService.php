@@ -28,16 +28,16 @@ class CatalogService
 
     public function addOrUpdateMultipleProductCategories(array $categories): void {
 
-        foreach ($categories as $type) {
+        foreach ($categories as $category) {
 
-            $m = $this->productCategoryRepository->findOneByCode($type->code);
+            $m = $this->productCategoryRepository->findOneByCode($category->getCode());
     
             if ($m == null) {
                 $m = new ProductCategory();
             }
     
-            $m->setCode($type->code);
-            $m->setName($type->name);
+            $m->setCode($category->getCode());
+            $m->setName($category->getName());
             $this->entityManagerInterface->persist($m);   
             
         }
@@ -47,16 +47,16 @@ class CatalogService
 
     }
 
-    public function addOrUpdateProductCategory(\App\Model\ProductCategory $category): ProductType {
+    public function addOrUpdateProductCategory(\App\Model\ProductCategory $category): ProductCategory {
 
-        $m = $this->productCategoryRepository->findOneByCode($category->code);
+        $m = $this->productCategoryRepository->findOneByCode($category->getCode());
 
         if ($m == null) {
             $m = new ProductCategory();
         }
 
-        $m->setCode($category->code);
-        $m->setName($category->name);
+        $m->setCode($category->getCode());
+        $m->setName($category->getName());
         $this->entityManagerInterface->persist($m);
         $this->entityManagerInterface->flush();
 
@@ -68,14 +68,14 @@ class CatalogService
 
         foreach ($types as $type) {
 
-            $m = $this->productTypeRepository->findOneByCode($type->code);
+            $m = $this->productTypeRepository->findOneByCode($type->getCode());
     
             if ($m == null) {
                 $m = new ProductType();
             }
     
-            $m->setCode($type->code);
-            $m->setName($type->name);
+            $m->setCode($type->getCode());
+            $m->setName($type->getName());
             $this->entityManagerInterface->persist($m);   
             
         }
@@ -87,14 +87,14 @@ class CatalogService
 
     public function addOrUpdateProductType(\App\Model\ProductType $type): ProductType {
 
-        $m = $this->productTypeRepository->findOneByCode($type->code);
+        $m = $this->productTypeRepository->findOneByCode($type->getCode());
 
         if ($m == null) {
             $m = new ProductType();
         }
 
-        $m->setCode($type->code);
-        $m->setName($type->name);
+        $m->setCode($type->getCode());
+        $m->setName($type->getName());
         $this->entityManagerInterface->persist($m);
         $this->entityManagerInterface->flush();
 
@@ -106,14 +106,14 @@ class CatalogService
 
         foreach ($manufacturers as $manufacturer) {
 
-            $m = $this->productManufacturerRepository->findOneByCode($manufacturer->code);
+            $m = $this->productManufacturerRepository->findOneByCode($manufacturer->getCode());
     
             if ($m == null) {
                 $m = new ProductManufacturer();
             }
     
-            $m->setCode($manufacturer->code);
-            $m->setName($manufacturer->name);
+            $m->setCode($manufacturer->getCode());
+            $m->setName($manufacturer->getName());
             $this->entityManagerInterface->persist($m);   
             
         }
@@ -125,14 +125,14 @@ class CatalogService
 
     public function addOrUpdateProductManufacturer(\App\Model\ProductManufacturer $manufacturer): ProductManufacturer {
 
-        $m = $this->productManufacturerRepository->findOneByCode($manufacturer->code);
+        $m = $this->productManufacturerRepository->findOneByCode($manufacturer->getCode());
 
         if ($m == null) {
             $m = new ProductManufacturer();
         }
 
-        $m->setCode($manufacturer->code);
-        $m->setName($manufacturer->name);
+        $m->setCode($manufacturer->getCode());
+        $m->setName($manufacturer->getName());
         $this->entityManagerInterface->persist($m);
         $this->entityManagerInterface->flush();
 
@@ -144,41 +144,41 @@ class CatalogService
     {
         foreach ($products as $productData) {
 
-            $product = $this->productRepository->findOneByItemNumber($productData->itemNumber);
+            $product = $this->productRepository->findOneByItemNumber($productData->getItemNumber());
 
             if ($product == null) {
                 $product = new Product();
             }
     
-            $product->setItemNumber($productData->itemNumber);
-            $product->setName($productData->name);
-            $product->setReleaseDate($productData->releaseDate);
+            $product->setItemNumber($productData->getItemNumber());
+            $product->setName($productData->getName());
+            $product->setReleaseDate($productData->getReleaseDate());
     
-            $productType = $this->productTypeRepository->findOneByCode($productData->typeCode);
+            $productType = $this->productTypeRepository->findOneByCode($productData->getTypeCode());
     
             if ($productType == null) {
                 $productType = new ProductType();
-                $productType->setCode($productData->typeCode);
-                $productType->setName($productData->typeCode);
+                $productType->setCode($productData->getTypeCode());
+                $productType->setName($productData->getTypeCode());
                 $this->entityManagerInterface->persist($productType);
                 $this->entityManagerInterface->flush();
             }
     
             $product->setType($productType);
     
-            $productManufacturer = $this->productManufacturerRepository->findOneByCode($productData->manufacturerCode);
+            $productManufacturer = $this->productManufacturerRepository->findOneByCode($productData->getManufacturerCode());
     
             if ($productManufacturer == null) {
                 $productManufacturer = new ProductManufacturer();
-                $productManufacturer->setCode($productData->manufacturerCode);
-                $productManufacturer->setName($productData->manufacturerCode);
+                $productManufacturer->setCode($productData->getManufacturerCode());
+                $productManufacturer->setName($productData->getManufacturerCode());
                 $this->entityManagerInterface->persist($productManufacturer);
                 $this->entityManagerInterface->flush();
             }
     
             $product->setManufacturer($productManufacturer);
     
-            foreach ($productData->categoryCodes as $code) {
+            foreach ($productData->getCategoryCodes() as $code) {
                 $category = $this->productCategoryRepository->findOneByCode($code);
                 if ($category == null) {
                     $category = new ProductCategory();
@@ -205,39 +205,39 @@ class CatalogService
     public function addOrUpdateProduct(\App\Model\Product $productData): Product
     {
 
-        $product = $this->productRepository->findOneByItemNumber($productData->itemNumber);
+        $product = $this->productRepository->findOneByItemNumber($productData->getItemNumber());
 
         if ($product == null) {
             $product = new Product();
         }
 
-        $product->setItemNumber($productData->itemNumber);
-        $product->setName($productData->name);
-        $product->setReleaseDate($productData->releaseDate);
+        $product->setItemNumber($productData->getItemNumber());
+        $product->setName($productData->getName());
+        $product->setReleaseDate($productData->getReleaseDate());
 
-        $productType = $this->productTypeRepository->findOneByCode($productData->typeCode);
+        $productType = $this->productTypeRepository->findOneByCode($productData->getTypeCode());
 
         if ($productType == null) {
             $productType = new ProductType();
-            $productType->setCode($productData->typeCode);
-            $productType->setName($productData->typeCode);
+            $productType->setCode($productData->getTypeCode());
+            $productType->setName($productData->getTypeCode());
             $this->entityManagerInterface->persist($productType);
         }
 
         $product->setType($productType);
 
-        $productManufacturer = $this->productManufacturerRepository->findOneByCode($productData['manufacturer']);
+        $productManufacturer = $this->productManufacturerRepository->findOneByCode($productData->getManufacturerCode());
 
         if ($productManufacturer == null) {
             $productManufacturer = new ProductManufacturer();
-            $productManufacturer->setCode($productData->manufacturerCode);
-            $productManufacturer->setName($productData->manufacturerCode);
+            $productManufacturer->setCode($productData->getManufacturerCode());
+            $productManufacturer->setName($productData->getManufacturerCode());
             $this->entityManagerInterface->persist($productManufacturer);
         }
 
         $product->setManufacturer($productManufacturer);
 
-        foreach ($productData->categoryCodes as $code) {
+        foreach ($productData->getCategoryCodes() as $code) {
             $category = $this->productCategoryRepository->findOneByCode($code);
             if ($category == null) {
                 $category = new ProductCategory();
