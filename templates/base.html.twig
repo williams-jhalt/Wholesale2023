@@ -319,6 +319,9 @@
         <!-- Page level plugins -->
         <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/chart.js/Chart.min.js') }}"></script>
 
+        <script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
+        <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+
         {% block javascripts %}
         {% endblock %}
     </body>

@@ -18,18 +18,13 @@
                 });
             },
             columns: [
-                { name: 'p.itemNumber', data: 'itemNumber' },
+                { name: 'p.itemNumber', data: 'itemNumber', render: function(data, type, row, meta) {
+                    return '<a href="' + Routing.generate('app_product_show', {id: row.id}) + '">' + row.itemNumber + '</a>';
+                } },
                 { name: 'p.name', data: 'name' },
                 { name: 'p.releaseDate', data: 'releaseDate', render: function (data, type, row, meta) {
                     return (new Date(data)).toLocaleDateString();
-                } },
-                { 
-                    data: 'id',
-                    render: function (data, type, row, meta) {
-                        return '<div class="text-center"><a href="' + data + '">View</a> &nbsp;|&nbsp; <a href="' + data + '/edit">Edit</a></div>';
-                    },
-                    orderable: false
-                }
+                } }
             ],
             processing: true,
             serverSide: true,
@@ -60,7 +55,6 @@
                 <th>ItemNumber</th>
                 <th>Name</th>
                 <th>Release Date</th>
-                <th>Actions</th>
             </tr>
         </thead>
         <tbody>

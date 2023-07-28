@@ -2,23 +2,15 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\ProductImageRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
-use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
+use Vich\UploaderBundle\Entity\File as EmbeddedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ProductImageRepository::class)]
-#[ApiResource(
-    operations: [
-        new Get(normalizationContext: ['groups' => 'productImage:item']),
-        new GetCollection(normalizationContext: ['groups' => 'productImage:list'])
-    ],
-    paginationEnabled: true
-)]
+#[Vich\Uploadable]
 class ProductImage
 {
     #[ORM\Id]
@@ -26,15 +18,17 @@ class ProductImage
     #[ORM\Column]
     private ?int $id = null;
     
-    #[UploadableField(mapping: 'productImages', fileNameProperty: 'filename', size: 'imageSize')]
+    #[Vich\UploadableField(
+        mapping: 'productImages',
+        fileNameProperty: 'image.name', 
+        size: 'image.size',
+        mimeType: 'image.mime_type',
+        originalName: 'image.original_name',
+        dimensions: 'image.dimensions')]
     private ?File $imageFile = null;
 
-    #[ORM\Column(length: 255, nullable:true)]
-    #[Groups(['productImage:list', 'productImage:item'])]
-    private ?string $filename = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $imageSize = null;    
+    #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
+    private ?EmbeddedFile $image = null;
     
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
@@ -42,6 +36,11 @@ class ProductImage
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
+
+    public function __construct()
+    {
+        $this->image = new EmbeddedFile();
+    }
 
     public function getId(): ?int
     {
@@ -53,7 +52,7 @@ class ProductImage
         $this->imageFile = $imageFile;
 
         if (null !== $imageFile) {
-            $this->updatedAt = new \DateTimeImmutable();
+            $this->updatedAt = new DateTimeImmutable();
         }
     }
 
@@ -62,26 +61,14 @@ class ProductImage
         return $this->imageFile;
     }
 
-    public function getFilename(): ?string
+    public function setImage(EmbeddedFile $image): void
     {
-        return $this->filename;
+        $this->image = $image;
     }
 
-    public function setFilename(string $filename): static
+    public function getImage(): ?EmbeddedFile
     {
-        $this->filename = $filename;
-
-        return $this;
-    }
-
-    public function setImageSize(?int $imageSize): void 
-    {
-        $this->imageSize = $imageSize;
-    }
-
-    public function getImageSize(): ?int
-    {
-        return $this->imageSize;
+        return $this->image;
     }
 
     public function getProduct(): ?Product
@@ -94,5 +81,15 @@ class ProductImage
         $this->product = $product;
 
         return $this;
+    }
+
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function getUpdatedAt(): ?DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 }

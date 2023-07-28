@@ -5,17 +5,44 @@
 {% block body %}
 
     <div class="row">
-        <div class="col-2">
-            <a class="btn btn-light" href="{{ path('app_product_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
-        </div>
-        <div class="col">
-            <h1>Edit Product</h1>
-        </div>
-        <div class="col text-right">
-            {{ include('product/_delete_form.html.twig') }}
-        </div>
-    </div>
 
-    {{ include('product/_form.html.twig', {'button_label': 'Update'}) }}
+        <div class="col-md-8">
+
+            <div class="row">
+                <div class="col-2">
+                    <a class="btn btn-light" href="{{ path('app_product_show', {id: product.id}) }}"><span class="fa fa-arrow-left"></span> Back</a>
+                </div>
+                <div class="col">
+                    <h1>Edit Product</h1>
+                </div>
+                <div class="col text-right">
+                    {{ include('product/_delete_form.html.twig') }}
+                </div>
+            </div>
+
+            {{ include('product/_form.html.twig', {'button_label': 'Update'}) }}
+
+        </div>
+
+        <div class="col-md-4">
+
+            {% for image in product.images %}
+
+                <div class="card" style="width:200px;">
+                    <img class="card-img-top" src="{{ asset('/images/products/' ~ image.image.name) }}">
+                    <div class="card-body">
+                        {{ include('product/_image_delete_form.html.twig') }}
+                    </div>
+                </div>
+
+            {% endfor %}
+
+            <br>
+
+            <a class="btn btn-primary" href="{{ path('app_product_image_add', {id: product.id}) }}">Add Image</a>
+
+        </div>
+
+    </div>
 
 {% endblock %}

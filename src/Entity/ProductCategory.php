@@ -2,24 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\ProductCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductCategoryRepository::class)]
-#[ApiResource(
-    operations: [
-        new Get(normalizationContext: ['groups' => 'productCategory:item']),
-        new GetCollection(normalizationContext: ['groups' => 'productCategory:list'])
-    ],
-    order: ['name' => 'ASC'],
-    paginationEnabled: true
-)]
 class ProductCategory
 {
     #[ORM\Id]
@@ -28,11 +16,9 @@ class ProductCategory
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['productCategory:list', 'productCategory:item'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['productCategory:list', 'productCategory:item'])]
     private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]

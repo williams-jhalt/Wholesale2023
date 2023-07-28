@@ -2,24 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\ProductTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductTypeRepository::class)]
-#[ApiResource(
-    operations: [
-        new Get(normalizationContext: ['groups' => 'productType:item']),
-        new GetCollection(normalizationContext: ['groups' => 'productType:list'])
-    ],
-    order: ['name' => 'ASC'],
-    paginationEnabled: true
-)]
 class ProductType
 {
     #[ORM\Id]
@@ -28,11 +16,9 @@ class ProductType
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['productType:list', 'productType:item'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['productType:list', 'productType:item'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'type', targetEntity: Product::class)]

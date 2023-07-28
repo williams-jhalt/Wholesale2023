@@ -14,6 +14,7 @@ use App\Repository\ProductRepository;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\QueryBuilder;
 use SplFileObject;
@@ -260,18 +261,32 @@ class ProductController extends AbstractController
 
     }
 
-    #[Route('/add-image/{id}', name: 'app_product_add_image')]
-    public function addImage(Request $request, Product $product, ProductRepository $productRepository, ProductImageRepository $productImageRepository): Response
+    #[Route('/remove-image/{id}', name: 'app_product_image_delete', methods: ['POST'])]
+    public function removeImage(Request $request, ProductImage $productImage, EntityManagerInterface $entityManagerInterface): Response
+    {
+
+        if ($this->isCsrfTokenValid('delete'.$productImage->getId(), $request->request->get('_token'))) {
+            $productId = $productImage->getProduct()->getId();
+
+            $entityManagerInterface->remove($productImage);
+            $entityManagerInterface->flush();
+        }
+
+        return $this->redirectToRoute('app_product_edit', ['id' => $productId]);      
+
+    }
+
+    #[Route('/add-image/{id}', name: 'app_product_image_add')]
+    public function addImage(Request $request, Product $product, ProductImageRepository $productImageRepository): Response
     {
 
         $productImage = new ProductImage();
+        $productImage->setProduct($product);
         $form = $this->createForm(ProductImageType::class, $productImage);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $productImageRepository->save($productImage, true);
-            $product->addImage($productImage);
-            $productRepository->save($product, true);
             return $this->redirectToRoute('app_product_edit', ['id' => $product->getId()]);        
         }
 
@@ -282,7 +297,7 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_product_show', methods: ['GET'], options: ['expose' => true])]
     public function show(Product $product): Response
     {
         return $this->render('product/show.html.twig', [
@@ -299,7 +314,7 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $productRepository->save($product, true);
 
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_product_show', ['id' => $product->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('product/edit.html.twig', [

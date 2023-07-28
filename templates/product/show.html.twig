@@ -5,6 +5,10 @@
 {% block body %}
 
     <div class="row">
+
+        <div class="col-md-8">
+
+    <div class="row">
         <div class="col-2">
             <a class="btn btn-light" href="{{ path('app_product_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
         </div>
@@ -16,11 +20,7 @@
     <table class="table">
         <tbody>
             <tr>
-                <th>Id</th>
-                <td>{{ product.id }}</td>
-            </tr>
-            <tr>
-                <th>ItemNumber</th>
+                <th>Item Number</th>
                 <td>{{ product.itemNumber }}</td>
             </tr>
             <tr>
@@ -35,5 +35,21 @@
     </table>
 
     <a class="btn btn-primary" href="{{ path('app_product_edit', {'id': product.id}) }}"><span class="fa fa-edit"></span> Edit</a>
+
+        </div>
+
+        <div class="col-md-4">
+
+            {% for image in product.images %}
+
+                <div class="card" style="width:200px;">
+                    <img class="card-img-top" src="{{ asset('/images/products/' ~ image.image.name) }}">
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
 
 {% endblock %}
