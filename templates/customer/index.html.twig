@@ -1,15 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ProductManufacturer index{% endblock %}
+{% block title %}Customer index{% endblock %}
 
 {% block javascripts %}
 <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready( function () {
-        $('#manufacturerTable').DataTable({
+        $('#customerTable').DataTable({
             ajax: {
-                url: '{{ path('app_product_manufacturer_data') }}',
+                url: Routing.generate('app_customer_data'),
                 method: 'POST'
             },
             fnServerParams: function(data) {
@@ -18,10 +18,10 @@
                 });
             },
             columns: [
-                { name: 'p.code', data: 'code', render: function(data, type, row, meta) {
-                    return '<a href="' + Routing.generate('app_product_manufacturer_show', {id: row.id}) + '">' + row.code + '</a>';
+                { name: 'c.customerNumber', data: 'customerNumber', render: function(data, type, row, meta) {
+                    return '<a href="' + Routing.generate('app_customer_show', {id: row.id}) + '">' + row.customerNumber + '</a>';
                 } },
-                { name: 'p.name', data: 'name' }
+                { name: 'c.company', data: 'company' }
             ],
             processing: true,
             serverSide: true,
@@ -36,26 +36,25 @@
 {% endblock %}
 
 {% block body %}
-
     <div class="row">
         <div class="col">
-            <h1>Manufacturers</h1>
+            <h1>Customers</h1>
         </div>
         <div class="col text-right">
-            <a class="btn btn-primary" href="{{ path('app_product_manufacturer_new') }}"><span class="fa fa-plus"></span> New</a>
-            <a class="btn btn-primary" href="{{ path('app_product_manufacturer_import') }}"><span class="fa fa-file"></span> Import</a>
+            <a class="btn btn-primary" href="{{ path('app_customer_new') }}"><span class="fa fa-plus"></span> New</a>
         </div>
     </div>
 
-    <table id="manufacturerTable" class="table display table-striped table-bordered">
+    <table id="customerTable" class="table display table-striped table-bordered">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>CustomerNumber</th>
+                <th>Company</th>
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
-    
+
+    <a href="{{ path('app_customer_new') }}">Create new</a>
 {% endblock %}

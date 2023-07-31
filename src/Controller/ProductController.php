@@ -61,7 +61,7 @@ class ProductController extends AbstractController
 
     }
 
-    #[Route('/data', name: 'app_product_data', methods: ['GET', 'POST'])]
+    #[Route('/data', name: 'app_product_data', methods: ['GET', 'POST'], options: ['expose' => true])]
     public function data(Request $request, ProductRepository $productRepository): JsonResponse
     {
         

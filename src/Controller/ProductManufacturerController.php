@@ -7,6 +7,9 @@ use App\Form\CsvImportType;
 use App\Form\ProductManufacturerType;
 use App\Message\ProductManufacturerUpdateNotification;
 use App\Repository\ProductManufacturerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,6 +27,70 @@ class ProductManufacturerController extends AbstractController
         return $this->render('product_manufacturer/index.html.twig', [
             'product_manufacturers' => $productManufacturerRepository->findAll(),
         ]);
+    }
+
+    private function buildSearchQuery(string $searchTerms, QueryBuilder $qb): QueryBuilder
+    {
+
+        $words = preg_split("/\s/", $searchTerms);
+        if(sizeof($words) == 1) {
+            $qb->andWhere("p.code LIKE :searchTermsItemNumber OR p.name LIKE :searchTermsName")
+                ->setParameters(new ArrayCollection ([
+                    new Parameter("searchTermsItemNumber", $words[0] . "%"),
+                    new Parameter("searchTermsName", "%" . $words[0] . "%")
+                ]));                
+        } else {
+            $params = [];
+            for ($i = 0; $i < sizeof($words); $i++) {
+                $params[] = new Parameter($i, "%" . $words[$i] . "%");
+                $qb->andWhere("p.name LIKE ?$i");
+            }
+            $qb->setParameters(new ArrayCollection($params));
+        }
+
+        return $qb;
+
+    }
+
+    #[Route('/data', name: 'app_product_manufacturer_data', methods: ['GET', 'POST'], options: ['expose' => true])]
+    public function data(Request $request, ProductManufacturerRepository $repo): JsonResponse
+    {
+        
+        $draw = (int) $request->get('draw', 1);
+        $start = (int) $request->get('start', 0);
+        $length = (int) $request->get('length', 10);
+        $search = $request->get('search');
+        $order = (array) $request->get('order', []);
+
+        $totalItems = $repo->count([]);
+        $filteredItems = $repo->count([]);
+
+        $qb = $repo->createQueryBuilder('p')->orderBy($order[0]['column_name'], $order[0]['dir']);
+        
+        $items = $this->buildSearchQuery($search['value'], $qb)->setFirstResult($start)->setMaxResults($length)->getQuery()->getResult();
+
+        $qb = $repo->createQueryBuilder('p')->select('count(p.id)');
+
+        $filteredItems = $this->buildSearchQuery($search['value'], $qb)->getQuery()->getSingleScalarResult();
+
+        $results = [];
+        foreach ($items as $item) {
+            $results[] = [                
+                'id' => $item->getId(),
+                'code' => $item->getCode(),
+                'name' => $item->getName()
+            ];
+        }
+        
+        $data = [
+            'draw' => $draw,
+            'recordsTotal' => $totalItems,
+            'recordsFiltered' => $filteredItems,
+            'data' => $results
+        ];
+
+        return $this->json($data);
+
     }
 
     #[Route('/new', name: 'app_product_manufacturer_new', methods: ['GET', 'POST'])]
@@ -178,7 +245,7 @@ class ProductManufacturerController extends AbstractController
 
     }
 
-    #[Route('/{id}', name: 'app_product_manufacturer_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_product_manufacturer_show', methods: ['GET'], options: ['expose' => true])]
     public function show(ProductManufacturer $productManufacturer): Response
     {
         return $this->render('product_manufacturer/show.html.twig', [
@@ -195,7 +262,7 @@ class ProductManufacturerController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $productManufacturerRepository->save($productManufacturer, true);
 
-            return $this->redirectToRoute('app_product_manufacturer_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_product_manufacturer_show', ['id' => $productManufacturer->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('product_manufacturer/edit.html.twig', [

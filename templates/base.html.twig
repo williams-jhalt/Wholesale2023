@@ -21,6 +21,7 @@
         <link href="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
         {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
         {% endblock %}
     </head>
     <body id="page-top">
@@ -68,6 +69,24 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_product_type_index') }}">Product Types</a>
+                </li>
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Weborders
+                </div>
+
+                <li class="nav-item">                
+                    <a class="nav-link" href="{{ path('app_weborder_index') }}">Weborders</a>
+                </li>
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    System
+                </div>
+
+                <li class="nav-item">                
+                    <a class="nav-link" href="{{ path('app_customer_index') }}">Customers</a>
                 </li>
 
                 {# <!-- Nav Item - Pages Collapse Menu -->
@@ -323,6 +342,7 @@
         <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
 
         {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </body>
 </html>

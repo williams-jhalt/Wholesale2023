@@ -1,15 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ProductManufacturer index{% endblock %}
+{% block title %}Weborder index{% endblock %}
 
 {% block javascripts %}
 <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready( function () {
-        $('#manufacturerTable').DataTable({
+        $('#weborderTable').DataTable({
             ajax: {
-                url: '{{ path('app_product_manufacturer_data') }}',
+                url: Routing.generate('app_weborder_data'),
                 method: 'POST'
             },
             fnServerParams: function(data) {
@@ -18,10 +18,16 @@
                 });
             },
             columns: [
-                { name: 'p.code', data: 'code', render: function(data, type, row, meta) {
-                    return '<a href="' + Routing.generate('app_product_manufacturer_show', {id: row.id}) + '">' + row.code + '</a>';
+                { name: 'o.orderNumber', data: 'orderNumber', render: function(data, type, row, meta) {
+                    return '<a href="' + Routing.generate('app_weborder_show', {id: row.id}) + '">' + row.orderNumber + '</a>';
                 } },
-                { name: 'p.name', data: 'name' }
+                { name: 'o.reference1', data: 'reference1' },
+                { name: 'o.reference2', data: 'reference2' },
+                { name: 'o.reference3', data: 'reference3' },
+                { name: 'o.orderDate', data: 'orderDate', render: function (data, type, row, meta) {
+                    var d = new Date(data);
+                    return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+                } }
             ],
             processing: true,
             serverSide: true,
@@ -36,26 +42,26 @@
 {% endblock %}
 
 {% block body %}
-
     <div class="row">
         <div class="col">
-            <h1>Manufacturers</h1>
+            <h1>Weborders</h1>
         </div>
         <div class="col text-right">
-            <a class="btn btn-primary" href="{{ path('app_product_manufacturer_new') }}"><span class="fa fa-plus"></span> New</a>
-            <a class="btn btn-primary" href="{{ path('app_product_manufacturer_import') }}"><span class="fa fa-file"></span> Import</a>
+            <a class="btn btn-primary" href="{{ path('app_weborder_new') }}"><span class="fa fa-plus"></span> New</a>
         </div>
     </div>
 
-    <table id="manufacturerTable" class="table display table-striped table-bordered">
+    <table id="weborderTable" class="table display table-striped table-bordered">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>OrderNumber</th>
+                <th>Reference1</th>
+                <th>Reference2</th>
+                <th>Reference3</th>
+                <th>Order Date</th>
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
-    
 {% endblock %}

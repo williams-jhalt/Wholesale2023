@@ -2,10 +2,13 @@
 
 namespace App\Service;
 
+use App\Repository\CustomerRepository;
 use App\Repository\ProductCategoryRepository;
 use App\Repository\ProductManufacturerRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ProductTypeRepository;
+use App\Repository\UserRepository;
+use App\Repository\WeborderRepository;
 
 class StatisticsService {
 
@@ -13,7 +16,10 @@ class StatisticsService {
         private ProductRepository $productRepo,
         private ProductCategoryRepository $productCategoryRepository,
         private ProductTypeRepository $productTypeRepository,
-        private ProductManufacturerRepository $productManufacturerRepository
+        private ProductManufacturerRepository $productManufacturerRepository,
+        private CustomerRepository $customerRepository,
+        private WeborderRepository $weborderRepository,
+        private UserRepository $userRepository
     ) {}
 
     public function getGeneralStatistics() {
@@ -22,12 +28,18 @@ class StatisticsService {
         $manufacturerCount = $this->productManufacturerRepository->count([]);
         $typeCount = $this->productTypeRepository->count([]);
         $categoryCount = $this->productCategoryRepository->count([]);
+        $userCount = $this->userRepository->count([]);
+        $weborderCount = $this->weborderRepository->count([]);
+        $customerCount = $this->customerRepository->count([]);
 
         return [
             'product_count' => $productCount,
             'manufacturer_count' => $manufacturerCount,
             'type_count' => $typeCount,
-            'category_count' => $categoryCount
+            'category_count' => $categoryCount,
+            'user_count' => $userCount,
+            'weborder_count' => $weborderCount,
+            'customer_count' => $customerCount
         ];
 
     }

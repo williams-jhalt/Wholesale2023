@@ -7,11 +7,26 @@
 <script src="{{ asset('assets/startbootstrap-sb-admin-2-gh-pages/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready( function () {
-        $('#typeTable').DataTable(
-            {
-                stateSave: true
-            }
-        );
+        $('#typeTable').DataTable({
+            ajax: {
+                url: '{{ path('app_product_type_data') }}',
+                method: 'POST'
+            },
+            fnServerParams: function(data) {
+                data['order'].forEach(function(items, index) {
+                    data['order'][index]['column_name'] = data['columns'][items.column]['name'];
+                });
+            },
+            columns: [
+                { name: 'p.code', data: 'code', render: function(data, type, row, meta) {
+                    return '<a href="' + Routing.generate('app_product_type_show', {id: row.id}) + '">' + row.code + '</a>';
+                } },
+                { name: 'p.name', data: 'name' }
+            ],
+            processing: true,
+            serverSide: true,
+            stateSave: true
+        });
     });
 </script>
 {% endblock %}
@@ -37,24 +52,9 @@
             <tr>
                 <th>Code</th>
                 <th>Name</th>
-                <th>actions</th>
             </tr>
         </thead>
         <tbody>
-        {% for product_type in product_types %}
-            <tr>
-                <td>{{ product_type.code }}</td>
-                <td>{{ product_type.name }}</td>
-                <td class="text-center">
-                    <a href="{{ path('app_product_type_show', {'id': product_type.id}) }}">View</a>&nbsp;|&nbsp;
-                    <a href="{{ path('app_product_type_edit', {'id': product_type.id}) }}">Edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
         </tbody>
     </table>
 

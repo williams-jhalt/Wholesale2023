@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Weborder{% endblock %}
+
+{% block stylesheets %}
+{{ encore_entry_link_tags('app') }}
+{% endblock %}
+
+{% block javascripts %}
+{{ encore_entry_script_tags('app') }}
+{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-2">
+            <a class="btn btn-light" href="{{ path('app_weborder_index') }}"><span class="fa fa-arrow-left"></span> Back</a>
+        </div>
+        <div class="col">
+            <h1>New Weborder</h1>
+        </div>
+    </div>
+
+    {{ include('weborder/_form.html.twig') }}
+
+{% endblock %}

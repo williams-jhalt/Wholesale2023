@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CustomerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
@@ -45,6 +47,14 @@ class Customer
 
     #[ORM\Column(length: 255)]
     private ?string $country = null;
+
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Weborder::class)]
+    private Collection $weborders;
+
+    public function __construct()
+    {
+        $this->weborders = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -181,5 +191,39 @@ class Customer
         $this->country = $country;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Weborder>
+     */
+    public function getWeborders(): Collection
+    {
+        return $this->weborders;
+    }
+
+    public function addWeborder(Weborder $weborder): static
+    {
+        if (!$this->weborders->contains($weborder)) {
+            $this->weborders->add($weborder);
+            $weborder->setCustomer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWeborder(Weborder $weborder): static
+    {
+        if ($this->weborders->removeElement($weborder)) {
+            // set the owning side to null (unless already changed)
+            if ($weborder->getCustomer() === $this) {
+                $weborder->setCustomer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString() {
+        return $this->customerNumber;
     }
 }

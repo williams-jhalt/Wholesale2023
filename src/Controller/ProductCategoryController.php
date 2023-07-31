@@ -7,6 +7,9 @@ use App\Form\CsvImportType;
 use App\Form\ProductCategoryType;
 use App\Message\ProductCategoryUpdateNotification;
 use App\Repository\ProductCategoryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,6 +27,70 @@ class ProductCategoryController extends AbstractController
         return $this->render('product_category/index.html.twig', [
             'product_categories' => $productCategoryRepository->findAll(),
         ]);
+    }
+
+    private function buildSearchQuery(string $searchTerms, QueryBuilder $qb): QueryBuilder
+    {
+
+        $words = preg_split("/\s/", $searchTerms);
+        if(sizeof($words) == 1) {
+            $qb->andWhere("p.code LIKE :searchTermsItemNumber OR p.name LIKE :searchTermsName")
+                ->setParameters(new ArrayCollection ([
+                    new Parameter("searchTermsItemNumber", $words[0] . "%"),
+                    new Parameter("searchTermsName", "%" . $words[0] . "%")
+                ]));                
+        } else {
+            $params = [];
+            for ($i = 0; $i < sizeof($words); $i++) {
+                $params[] = new Parameter($i, "%" . $words[$i] . "%");
+                $qb->andWhere("p.name LIKE ?$i");
+            }
+            $qb->setParameters(new ArrayCollection($params));
+        }
+
+        return $qb;
+
+    }
+
+    #[Route('/data', name: 'app_product_category_data', methods: ['GET', 'POST'], options: ['expose' => true])]
+    public function data(Request $request, ProductCategoryRepository $productCategoryRepository): JsonResponse
+    {
+        
+        $draw = (int) $request->get('draw', 1);
+        $start = (int) $request->get('start', 0);
+        $length = (int) $request->get('length', 10);
+        $search = $request->get('search');
+        $order = (array) $request->get('order', []);
+
+        $totalItems = $productCategoryRepository->count([]);
+        $filteredItems = $productCategoryRepository->count([]);
+
+        $qb = $productCategoryRepository->createQueryBuilder('p')->orderBy($order[0]['column_name'], $order[0]['dir']);
+        
+        $items = $this->buildSearchQuery($search['value'], $qb)->setFirstResult($start)->setMaxResults($length)->getQuery()->getResult();
+
+        $qb = $productCategoryRepository->createQueryBuilder('p')->select('count(p.id)');
+
+        $filteredItems = $this->buildSearchQuery($search['value'], $qb)->getQuery()->getSingleScalarResult();
+
+        $results = [];
+        foreach ($items as $item) {
+            $results[] = [                
+                'id' => $item->getId(),
+                'code' => $item->getCode(),
+                'name' => $item->getName()
+            ];
+        }
+        
+        $data = [
+            'draw' => $draw,
+            'recordsTotal' => $totalItems,
+            'recordsFiltered' => $filteredItems,
+            'data' => $results
+        ];
+
+        return $this->json($data);
+
     }
 
     #[Route('/new', name: 'app_product_category_new', methods: ['GET', 'POST'])]
@@ -178,7 +245,7 @@ class ProductCategoryController extends AbstractController
 
     }
 
-    #[Route('/{id}', name: 'app_product_category_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_product_category_show', methods: ['GET'], options: ['expose' => true])]
     public function show(ProductCategory $productCategory): Response
     {
         return $this->render('product_category/show.html.twig', [
@@ -195,7 +262,7 @@ class ProductCategoryController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $productCategoryRepository->save($productCategory, true);
 
-            return $this->redirectToRoute('app_product_category_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_product_category_show', ['id' => $productCategory->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('product_category/edit.html.twig', [

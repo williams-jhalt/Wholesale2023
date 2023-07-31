@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weborder{% endblock %}
+
+{% block body %}
+    <h1>Weborder</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ weborder.id }}</td>
+            </tr>
+            <tr>
+                <th>OrderNumber</th>
+                <td>{{ weborder.orderNumber }}</td>
+            </tr>
+            <tr>
+                <th>Reference1</th>
+                <td>{{ weborder.reference1 }}</td>
+            </tr>
+            <tr>
+                <th>Reference2</th>
+                <td>{{ weborder.reference2 }}</td>
+            </tr>
+            <tr>
+                <th>Reference3</th>
+                <td>{{ weborder.reference3 }}</td>
+            </tr>
+            <tr>
+                <th>ShipToName</th>
+                <td>{{ weborder.shipToName }}</td>
+            </tr>
+            <tr>
+                <th>ShipToAddress</th>
+                <td>{{ weborder.shipToAddress }}</td>
+            </tr>
+            <tr>
+                <th>ShipToAddress2</th>
+                <td>{{ weborder.shipToAddress2 }}</td>
+            </tr>
+            <tr>
+                <th>ShipToAddress3</th>
+                <td>{{ weborder.shipToAddress3 }}</td>
+            </tr>
+            <tr>
+                <th>ShipToCity</th>
+                <td>{{ weborder.shipToCity }}</td>
+            </tr>
+            <tr>
+                <th>ShipToState</th>
+                <td>{{ weborder.shipToState }}</td>
+            </tr>
+            <tr>
+                <th>ShipToZip</th>
+                <td>{{ weborder.shipToZip }}</td>
+            </tr>
+            <tr>
+                <th>ShipToCountry</th>
+                <td>{{ weborder.shipToCountry }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_weborder_index') }}">back to list</a>
+
+    <a href="{{ path('app_weborder_edit', {'id': weborder.id}) }}">edit</a>
+
+    {{ include('weborder/_delete_form.html.twig') }}
+{% endblock %}
