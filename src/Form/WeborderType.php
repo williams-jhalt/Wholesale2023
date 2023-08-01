@@ -2,9 +2,8 @@
 
 namespace App\Form;
 
-use App\Entity\Customer;
 use App\Entity\Weborder;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Service\CustomerToCustomerNumberTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -12,11 +11,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class WeborderType extends AbstractType
 {
+
+    public function __construct(
+        private CustomerToCustomerNumberTransformer $transformer
+    ) {}
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('orderNumber', TextType::class, ['label' => 'Order Number', 'disabled' => true])
-            ->add('customer', CustomerAutocompleteField::class)
+            ->add('customer', TextType::class, ['attr' => ['class' => 'basicAutoComplete']])
             ->add('reference1')
             ->add('reference2')
             ->add('reference3')
@@ -29,6 +33,8 @@ class WeborderType extends AbstractType
             ->add('shipToZip')
             ->add('shipToCountry')
         ;
+
+        $builder->get('customer')->addModelTransformer($this->transformer);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -2,14 +2,18 @@
 
 {% block title %}New Weborder{% endblock %}
 
-{% block stylesheets %}
-{{ encore_entry_link_tags('app') }}
-{% endblock %}
-
 {% block javascripts %}
-{{ encore_entry_script_tags('app') }}
-{% endblock %}
+<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+<script type="text/javascript">
 
+    $('.basicAutoComplete').autoComplete({
+        resolverSettings: {
+            url: Routing.generate('app_customer_select')
+        }
+    });
+
+</script>
+{% endblock %}
 {% block body %}
 
     <div class="row">

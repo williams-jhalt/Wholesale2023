@@ -22,6 +22,8 @@
                     return '<a href="' + Routing.generate('app_product_show', {id: row.id}) + '">' + row.itemNumber + '</a>';
                 } },
                 { name: 'p.name', data: 'name' },
+                { name: 'p.manufacturer', data: 'manufacturer' },
+                { name: 'p.type', data: 'type' },
                 { name: 'p.releaseDate', data: 'releaseDate', render: function (data, type, row, meta) {
                     return (new Date(data)).toLocaleDateString();
                 } }
@@ -54,6 +56,8 @@
             <tr>
                 <th>ItemNumber</th>
                 <th>Name</th>
+                <th>Manufacturer</th>
+                <th>Type</th>
                 <th>Release Date</th>
             </tr>
         </thead>

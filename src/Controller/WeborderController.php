@@ -74,6 +74,7 @@ class WeborderController extends AbstractController
         foreach ($items as $item) {
             $results[] = [
                 'id' => $item->getId(),
+                'customer' => $item->getCustomer()->getCustomerNumber(),
                 'orderNumber' => $item->getOrderNumber(),
                 'reference1' => $item->getReference1(),
                 'reference2' => $item->getReference2(),

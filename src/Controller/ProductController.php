@@ -74,11 +74,11 @@ class ProductController extends AbstractController
         $totalItems = $productRepository->count([]);
         $filteredItems = $productRepository->count([]);
 
-        $qb = $productRepository->createQueryBuilder('p')->orderBy($order[0]['column_name'], $order[0]['dir']);
+        $qb = $productRepository->createQueryBuilder('p')->where('p.active = 1')->orderBy($order[0]['column_name'], $order[0]['dir']);
         
         $items = $this->buildSearchQuery($search['value'], $qb)->setFirstResult($start)->setMaxResults($length)->getQuery()->getResult();
 
-        $qb = $productRepository->createQueryBuilder('p')->select('count(p.id)');
+        $qb = $productRepository->createQueryBuilder('p')->select('count(p.id)')->where('p.active = 1');
 
         $filteredItems = $this->buildSearchQuery($search['value'], $qb)->getQuery()->getSingleScalarResult();
 
@@ -88,7 +88,9 @@ class ProductController extends AbstractController
                 'id' => $item->getId(),
                 'itemNumber' => $item->getItemNumber(),
                 'releaseDate' => $item->getReleaseDate(),
-                'name' => $item->getName()
+                'name' => $item->getName(),
+                'manufacturer' => $item->getManufacturer()->getCode(),
+                'type' => $item->getType()->getCode()
             ];
         }
         

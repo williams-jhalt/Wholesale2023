@@ -21,6 +21,7 @@
                 { name: 'o.orderNumber', data: 'orderNumber', render: function(data, type, row, meta) {
                     return '<a href="' + Routing.generate('app_weborder_show', {id: row.id}) + '">' + row.orderNumber + '</a>';
                 } },
+                { name: 'o.customer', data: 'customer'},
                 { name: 'o.reference1', data: 'reference1' },
                 { name: 'o.reference2', data: 'reference2' },
                 { name: 'o.reference3', data: 'reference3' },
@@ -55,6 +56,7 @@
         <thead>
             <tr>
                 <th>OrderNumber</th>
+                <th>Customer</th>
                 <th>Reference1</th>
                 <th>Reference2</th>
                 <th>Reference3</th>

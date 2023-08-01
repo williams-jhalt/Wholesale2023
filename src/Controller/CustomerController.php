@@ -45,6 +45,26 @@ class CustomerController extends AbstractController
         return $qb;
     }
 
+    #[Route('/select', name: 'app_customer_select', methods: ['GET'], options: ['expose' => true])]
+    public function select(Request $request, CustomerRepository $customerRepository): JsonResponse
+    {
+        if (empty($q = $request->get('q'))) {
+            $customers = $customerRepository->findAll();
+        } else {
+            $qb = $customerRepository->createQueryBuilder('c');
+            $customers = $this->buildSearchQuery($q, $qb)->getQuery()->getResult();
+        }
+
+        $data = [];
+
+        foreach ($customers as $customer) {
+            $data[] = $customer->getCustomerNumber();
+        }
+
+        return $this->json($data);
+
+    }
+
 
     #[Route('/data', name: 'app_customer_data', methods: ['GET', 'POST'], options: ['expose' => true])]
     public function data(Request $request, CustomerRepository $customerRepository): JsonResponse
