@@ -11,7 +11,8 @@ class WholesaleSynchronizationService {
     public function __construct(
         private CatalogService $catalogService,
         private HttpClientInterface $client,
-        private MessageBusInterface $bus
+        private MessageBusInterface $bus,
+        private string $wholesaleRestUrl
     ) {}
 
     public function sync() {
@@ -19,12 +20,11 @@ class WholesaleSynchronizationService {
         $start = 0;
         $count = 10;
 
-
         do {
 
             $response = $this->client->request(
                 'GET',
-                "https://wholesale.williams-trading.com/rest/products",
+                $this->wholesaleRestUrl + "/products",
                 [
                     'query' => [
                         'format' => 'json',

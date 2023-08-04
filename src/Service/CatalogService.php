@@ -8,13 +8,17 @@ use App\Entity\ProductImage;
 use App\Entity\ProductManufacturer;
 use App\Entity\ProductType;
 use App\Repository\ProductCategoryRepository;
+use App\Repository\ProductImageRepository;
 use App\Repository\ProductManufacturerRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ProductTypeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CatalogService
 {
@@ -24,8 +28,14 @@ class CatalogService
         private ProductTypeRepository $productTypeRepository,
         private ProductManufacturerRepository $productManufacturerRepository,
         private ProductCategoryRepository $productCategoryRepository,
+        private ProductImageRepository $productImageRepository,
         private EntityManagerInterface $entityManagerInterface,
-        private LoggerInterface $logger
+        private HttpClientInterface $httpClientInterface,
+        private LoggerInterface $logger,
+        private CacheInterface $cache,
+        private string $erpConnectorUrl,
+        private string $erpConnectorToken,
+        private string $importDir
     ) {
     }
 
@@ -33,16 +43,7 @@ class CatalogService
     {
 
         foreach ($categories as $category) {
-
-            $m = $this->productCategoryRepository->findOneByCode($category->getCode());
-
-            if ($m == null) {
-                $m = new ProductCategory();
-            }
-
-            $m->setCode($category->getCode());
-            $m->setName($category->getName());
-            $this->entityManagerInterface->persist($m);
+            $this->processCategory($category);
         }
 
         $this->entityManagerInterface->flush();
@@ -51,16 +52,7 @@ class CatalogService
 
     public function addOrUpdateProductCategory(\App\Model\ProductCategory $category): ProductCategory
     {
-
-        $m = $this->productCategoryRepository->findOneByCode($category->getCode());
-
-        if ($m == null) {
-            $m = new ProductCategory();
-        }
-
-        $m->setCode($category->getCode());
-        $m->setName($category->getName());
-        $this->entityManagerInterface->persist($m);
+        $m = $this->processCategory($category);
         $this->entityManagerInterface->flush();
 
         return $m;
@@ -70,16 +62,7 @@ class CatalogService
     {
 
         foreach ($types as $type) {
-
-            $m = $this->productTypeRepository->findOneByCode($type->getCode());
-
-            if ($m == null) {
-                $m = new ProductType();
-            }
-
-            $m->setCode($type->getCode());
-            $m->setName($type->getName());
-            $this->entityManagerInterface->persist($m);
+            $this->processType($type);
         }
 
         $this->entityManagerInterface->flush();
@@ -89,15 +72,7 @@ class CatalogService
     public function addOrUpdateProductType(\App\Model\ProductType $type): ProductType
     {
 
-        $m = $this->productTypeRepository->findOneByCode($type->getCode());
-
-        if ($m == null) {
-            $m = new ProductType();
-        }
-
-        $m->setCode($type->getCode());
-        $m->setName($type->getName());
-        $this->entityManagerInterface->persist($m);
+        $m = $this->processType($type);
         $this->entityManagerInterface->flush();
 
         return $m;
@@ -107,16 +82,7 @@ class CatalogService
     {
 
         foreach ($manufacturers as $manufacturer) {
-
-            $m = $this->productManufacturerRepository->findOneByCode($manufacturer->getCode());
-
-            if ($m == null) {
-                $m = new ProductManufacturer();
-            }
-
-            $m->setCode($manufacturer->getCode());
-            $m->setName($manufacturer->getName());
-            $this->entityManagerInterface->persist($m);
+            $this->processManufacturer($manufacturer);
         }
 
         $this->entityManagerInterface->flush();
@@ -126,18 +92,11 @@ class CatalogService
     public function addOrUpdateProductManufacturer(\App\Model\ProductManufacturer $manufacturer): ProductManufacturer
     {
 
-        $m = $this->productManufacturerRepository->findOneByCode($manufacturer->getCode());
-
-        if ($m == null) {
-            $m = new ProductManufacturer();
-        }
-
-        $m->setCode($manufacturer->getCode());
-        $m->setName($manufacturer->getName());
-        $this->entityManagerInterface->persist($m);
+        $m = $this->processManufacturer($manufacturer);
         $this->entityManagerInterface->flush();
 
         return $m;
+
     }
 
     public function addOrUpdateMultipleProducts(array $products): void
@@ -163,6 +122,56 @@ class CatalogService
         $this->entityManagerInterface->flush();
 
         return $product;
+    }
+
+    private function processCategory(\App\Model\ProductCategory $productCategoryData): ProductCategory
+    {
+
+        $m = $this->productCategoryRepository->findOneByCode($productCategoryData->getCode());
+
+        if ($m == null) {
+            $m = new ProductCategory();
+        }
+
+        $m->setCode($productCategoryData->getCode());
+        $m->setName($productCategoryData->getName());
+        $this->entityManagerInterface->persist($m);
+
+        return $m;
+
+    }
+
+    private function processManufacturer(\App\Model\ProductManufacturer $productManufacturerData): ProductManufacturer
+    {
+
+        $m = $this->productManufacturerRepository->findOneByCode($productManufacturerData->getCode());
+
+        if ($m == null) {
+            $m = new ProductManufacturer();
+        }
+
+        $m->setCode($productManufacturerData->getCode());
+        $m->setName($productManufacturerData->getName());
+        $this->entityManagerInterface->persist($m);
+
+        return $m;
+
+    }
+
+    private function processType(\App\Model\ProductType $productTypeData): ProductType
+    {
+        $m = $this->productTypeRepository->findOneByCode($productTypeData->getCode());
+
+        if ($m == null) {
+            $m = new ProductType();
+        }
+
+        $m->setCode($productTypeData->getCode());
+        $m->setName($productTypeData->getName());
+        $this->entityManagerInterface->persist($m);
+
+        return $m;
+
     }
 
     private function processProduct(\App\Model\Product $productData): Product
@@ -356,25 +365,46 @@ class CatalogService
         }
 
         $this->entityManagerInterface->persist($product);
-        $this->entityManagerInterface->flush();         
+        $this->entityManagerInterface->flush();
 
-        foreach ($productData->getImages() as $imageData) {    
-                      
-            $image = new ProductImage();
-            if ($imageData->getFile() !== null) {
-                $image->setImageFile($imageData->getFile());
-                $image->setProduct($product);
-                $this->entityManagerInterface->persist($image);
-                $this->entityManagerInterface->flush();         
-            } elseif ($imageData->getImageUrl() !== null) { 
-                $fh = tempnam(sys_get_temp_dir(), "image_import");
+        if (!empty($productData->getImages())) {
+
+            $images = $this->productImageRepository->findBy(['product' => $product]);
+
+            foreach ($productData->getImages() as $imageData) {
+
+                $exists = false;
+                foreach ($images as $i) {
+                    if ($i->getImage()->getOriginalName() == $imageData->getOriginalFilename()) {
+                        $this->logger->info("Image exists; skipping");
+                        $exists = true;
+                    }
+                }
+
+                if ($exists) {
+                    continue;
+                }
+
+                $image = new ProductImage();
+
+                $filesystem = new Filesystem();
+                $filesystem->mkdir($this->importDir);
+
+                $fh = tempnam($this->importDir, "image_import");
+
+                $this->logger->info("Creating temporary file " . $fh);
+
                 if (false !== file_put_contents($fh, file_get_contents($imageData->getImageUrl()))) {
-                    $image->setImageFile(new UploadedFile($fh, $imageData->getOriginalFilename(), null, null, true));       
+                    $image->setImageFile(new UploadedFile($fh, $imageData->getOriginalFilename(), null, null, true));
                     $image->setProduct($product);
                     $this->entityManagerInterface->persist($image);
-                    $this->entityManagerInterface->flush();         
+                    $this->entityManagerInterface->flush();
+
+                    $this->logger->info("Added new image file " . $image->getImage()->getName());
                 }
+
             }
+
         }
 
         return $product;

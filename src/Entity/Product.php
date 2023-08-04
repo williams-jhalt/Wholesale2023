@@ -62,7 +62,7 @@ class Product
     private ?bool $video = false;
 
     #[ORM\Column]
-    private ?bool $onSale = null;
+    private ?bool $onSale = false;
 
     #[ORM\Column(nullable: true)]
     private ?float $height = null;

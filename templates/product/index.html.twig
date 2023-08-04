@@ -9,7 +9,7 @@
     $(document).ready( function () {
         $('#productTable').DataTable({
             ajax: {
-                url: '{{ path('app_product_data') }}',
+                url: Routing.generate('app_product_data'),
                 method: 'POST'
             },
             fnServerParams: function(data) {
@@ -32,6 +32,18 @@
             serverSide: true,
             stateSave: true
         });
+
+        $('#showInactiveCheckbox').on('click', function(e) {
+            var table = $('#productTable').DataTable()
+
+            if (e.target.checked) {
+                table.ajax.url(Routing.generate('app_product_data', {showInactive: true}));
+            } else {
+                table.ajax.url(Routing.generate('app_product_data'));
+            }
+
+            table.draw();
+        });
     });
 </script>
 {% endblock %}
@@ -50,6 +62,13 @@
             <a class="btn btn-primary" href="{{ path('app_product_import') }}"><span class="fa fa-file"></span> Import</a>
         </div>
     </div>
+
+    <form class="form-inline">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="showInactiveCheckbox" value="true">
+            <label class="form-check-label" for="showInactiveCheckbox">Show Inactive Products</label>
+        </div>
+    </form>
 
     <table id="productTable" class="table display table-striped table-bordered">
         <thead>

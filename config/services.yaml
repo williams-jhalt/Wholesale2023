@@ -7,12 +7,20 @@ parameters:
     app.import_dir: '%kernel.project_dir%/var/import'
     app.erpconnector_api_key: '%env(ERPCONNECTOR_API_KEY)%'
     app.erpconnector_url: '%env(ERPCONNECTOR_URL)%'
+    app.product_image_location: '%kernel.project_dir%/public/images/products'
+    app.legacy_wholesale_rest_url: '%env(LEGACY_WHOLESALE_REST_URL)%'
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $erpConnectorUrl: '%app.erpconnector_url%'
+            $erpConnectorToken: '%app.erpconnector_api_key%'
+            $importDir: "%app.import_dir%/image_import"
+            $wholesaleRestUrl: "%app.legacy_wholesale_rest_url%"
+
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -25,8 +33,3 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
-    App\Service\CustomerService:
-        arguments:
-            $erpConnectorUrl: '%app.erpconnector_url%'
-            $erpConnectorToken: '%app.erpconnector_api_key%'

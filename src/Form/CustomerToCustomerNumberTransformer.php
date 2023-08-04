@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Form;
 
 use App\Repository\CustomerRepository;
 use Symfony\Component\Form\DataTransformerInterface;
@@ -13,7 +13,7 @@ class CustomerToCustomerNumberTransformer implements DataTransformerInterface
     ) {
     }
 
-    public function transform($customer)
+    public function transform($customer): mixed
     {
         if ($customer === null) {
             return '';
@@ -22,10 +22,10 @@ class CustomerToCustomerNumberTransformer implements DataTransformerInterface
         return $customer->getCustomerNumber();
     }
 
-    public function reverseTransform($id)
+    public function reverseTransform($id): mixed
     {
         if (!$id) {
-            return;
+            return null;
         }
 
         $customer = $this->customerRepository->findOneByCustomerNumber($id);

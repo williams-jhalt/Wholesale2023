@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Weborder;
-use App\Service\CustomerToCustomerNumberTransformer;
+use App\Form\CustomerToCustomerNumberTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;

@@ -33,9 +33,7 @@ class ProductController extends AbstractController
     #[Route('/', name: 'app_product_index', methods: ['GET'])]
     public function index(ProductRepository $productRepository): Response
     {
-        return $this->render('product/index.html.twig', [
-            'products' => $productRepository->findAll(),
-        ]);
+        return $this->render('product/index.html.twig');
     }
 
     private function buildSearchQuery(string $searchTerms, QueryBuilder $qb): QueryBuilder
@@ -70,15 +68,24 @@ class ProductController extends AbstractController
         $length = (int) $request->get('length', 10);
         $search = $request->get('search');
         $order = (array) $request->get('order', []);
+        $showInactive = $request->get('showInactive', false);
 
         $totalItems = $productRepository->count([]);
         $filteredItems = $productRepository->count([]);
 
-        $qb = $productRepository->createQueryBuilder('p')->where('p.active = 1')->orderBy($order[0]['column_name'], $order[0]['dir']);
+        $qb = $productRepository->createQueryBuilder('p')->orderBy($order[0]['column_name'], $order[0]['dir']);
+
+        if (!$showInactive) {
+            $qb->where("p.active = 1");
+        }
         
         $items = $this->buildSearchQuery($search['value'], $qb)->setFirstResult($start)->setMaxResults($length)->getQuery()->getResult();
 
-        $qb = $productRepository->createQueryBuilder('p')->select('count(p.id)')->where('p.active = 1');
+        $qb = $productRepository->createQueryBuilder('p')->select('count(p.id)');
+
+        if (!$showInactive) {
+            $qb->where("p.active = 1");
+        }
 
         $filteredItems = $this->buildSearchQuery($search['value'], $qb)->getQuery()->getSingleScalarResult();
 
